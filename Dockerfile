@@ -37,8 +37,12 @@ COPY routes ./routes
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Copy package files
+# Copy package files and Vite build assets
 COPY package.json ./
+COPY vite.config.js ./
+COPY resources/css ./resources/css
+COPY resources/js ./resources/js
+COPY resources/views ./resources/views
 
 # Install Node dependencies and build assets
 RUN npm install && npm run build
