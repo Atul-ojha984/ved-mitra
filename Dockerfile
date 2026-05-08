@@ -30,6 +30,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY composer.json composer.lock ./
 COPY artisan ./
 COPY bootstrap ./bootstrap
+COPY app ./app
+COPY config ./config
+COPY routes ./routes
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
