@@ -69,7 +69,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" data-secure-form novalidate>
                         @csrf
                         @method('PUT')
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -79,7 +79,10 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                                <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" data-indian-phone inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" autocomplete="tel-national" placeholder="9876543210" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition {{ $errors->has('phone') ? 'form-input-error' : '' }}">
+                                @error('phone')
+                                    <p class="form-field-error">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
                         <div class="mb-4">
@@ -89,7 +92,7 @@
                         </div>
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Profile Photo</label>
-                            <input type="file" name="avatar" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100 transition">
+                            <input type="file" name="avatar" accept=".jpg,.jpeg,.png,.webp" data-max-mb="2" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100 transition">
                         </div>
                         <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-xl transition shadow-lg shadow-orange-500/30">
                             Save Changes
@@ -165,5 +168,6 @@
 
     </main>
 
+@include('partials.form-security')
 </body>
 </html>

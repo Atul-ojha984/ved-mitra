@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\SearchPanditsRequest;
 use App\Models\PanditProfile;
 use App\Models\Service;
 
 class SearchController extends Controller
 {
-    public function index(Request $request)
+    public function index(SearchPanditsRequest $request)
     {
+        $filters = $request->validated();
         $query = PanditProfile::query()->approved()->with(['user', 'services']);
 
         // Filter by specific service if requested
-        if ($request->filled('service')) {
-            $query->whereHas('services', function ($q) use ($request) {
-                $q->where('name', $request->service);
+        if (!empty($filters['service'])) {
+            $query->whereHas('services', function ($q) use ($filters) {
+                $q->where('name', $filters['service']);
             });
         }
 
         // Apply Haversine formula for location-based search if lat/lng are provided
-        if ($request->filled('lat') && $request->filled('lng')) {
-            $lat = $request->lat;
-            $lng = $request->lng;
+        if (isset($filters['lat'], $filters['lng'])) {
+            $lat = (float) $filters['lat'];
+            $lng = (float) $filters['lng'];
             $radius = 50; // default 50km radius
 
             // Haversine formula

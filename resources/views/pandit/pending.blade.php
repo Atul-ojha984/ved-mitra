@@ -103,5 +103,6 @@
             </div>
         </div>
     </div>
+@include('partials.form-security')
 </body>
 </html>

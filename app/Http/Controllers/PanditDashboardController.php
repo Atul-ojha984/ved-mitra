@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BlockDateRequest;
+use App\Http\Requests\GetSlotsRequest;
+use App\Http\Requests\SaveAvailabilityRequest;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Availability;
@@ -115,21 +118,15 @@ class PanditDashboardController extends Controller
         return view('pandit.availability', compact('slots', 'blockedDates'));
     }
 
-    public function saveAvailability(Request $request)
+    public function saveAvailability(SaveAvailabilityRequest $request)
     {
         $p = $this->profile();
-        $request->validate([
-            'slots' => 'required|array',
-            'slots.*.day' => 'required|integer|between:0,6',
-            'slots.*.start' => 'required|date_format:H:i',
-            'slots.*.end' => 'required|date_format:H:i|after:slots.*.start',
-            'slots.*.active' => 'sometimes|boolean',
-        ]);
+        $validated = $request->validated();
 
         // Replace all availability slots
         $p->availabilities()->delete();
 
-        foreach ($request->slots as $slot) {
+        foreach ($validated['slots'] as $slot) {
             if (!empty($slot['active'])) {
                 Availability::create([
                     'pandit_profile_id' => $p->id,
@@ -144,16 +141,13 @@ class PanditDashboardController extends Controller
         return back()->with('success', 'Availability updated!');
     }
 
-    public function blockDate(Request $request)
+    public function blockDate(BlockDateRequest $request)
     {
-        $request->validate([
-            'blocked_date' => 'required|date|after_or_equal:today',
-            'reason' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $this->profile()->blockedDates()->create([
-            'blocked_date' => $request->blocked_date,
-            'reason' => $request->reason,
+            'blocked_date' => $validated['blocked_date'],
+            'reason' => $validated['reason'] ?? null,
         ]);
 
         return back()->with('success', 'Date blocked successfully.');
@@ -251,10 +245,12 @@ class PanditDashboardController extends Controller
     }
 
     // ─── Get Available Slots (API for booking form) ────
-    public function getSlots(Request $request)
+    public function getSlots(GetSlotsRequest $request)
     {
+        $validated = $request->validated();
+
         $p = $this->profile();
-        $date = Carbon::parse($request->date);
+        $date = Carbon::parse($validated['date']);
         $dayOfWeek = $date->dayOfWeek;
 
         // Check if date is blocked
@@ -271,7 +267,7 @@ class PanditDashboardController extends Controller
         // Generate slots
         $start = Carbon::parse($availability->start_time);
         $end = Carbon::parse($availability->end_time);
-        $duration = $request->integer('duration', 2);
+        $duration = (int) ($validated['duration'] ?? 2);
 
         $existingBookings = $p->bookings()
             ->where('booking_date', $date->toDateString())

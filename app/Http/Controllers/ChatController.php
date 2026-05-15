@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\ChatSendRequest;
 use App\Models\ChatMessage;
 use App\Models\Booking;
 
@@ -30,14 +30,12 @@ class ChatController extends Controller
         return view('chat.show', compact('booking', 'messages', 'otherUser'));
     }
 
-    public function send(Request $request, Booking $booking)
+    public function send(ChatSendRequest $request, Booking $booking)
     {
         $user = auth()->user();
         if ($booking->user_id !== $user->id && $booking->pandit->user_id !== $user->id) abort(403);
 
-        $validated = $request->validate([
-            'message' => 'required|string|max:2000',
-        ]);
+        $validated = $request->validated();
 
         $receiverId = $booking->user_id === $user->id ? $booking->pandit->user_id : $booking->user_id;
 

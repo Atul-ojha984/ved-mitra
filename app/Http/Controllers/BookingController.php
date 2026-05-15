@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\BookingStoreRequest;
 use App\Models\PanditProfile;
 use App\Models\Booking;
-use App\Models\Service;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -18,17 +17,13 @@ class BookingController extends Controller
         return view('booking.create', compact('pandit'));
     }
 
-    public function store(Request $request, PanditProfile $pandit)
+    public function store(BookingStoreRequest $request, PanditProfile $pandit)
     {
-        $validated = $request->validate([
-            'service_id' => 'required|exists:services,id',
-            'booking_date' => 'required|date|after_or_equal:today',
-            'booking_time' => 'required',
-            'address' => 'required|string|max:500',
-        ]);
+        $validated = $request->validated();
 
         // Get Service info
         $service = $pandit->services()->where('service_id', $validated['service_id'])->first();
+        abort_unless($service, 422, 'Selected service is not available for this Pandit.');
         $totalAmount = $service->pivot->custom_price ?? $service->base_price ?? 1100;
         $durationHours = $service->duration_hours ?? 2;
 

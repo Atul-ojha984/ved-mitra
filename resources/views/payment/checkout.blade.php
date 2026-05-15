@@ -99,7 +99,7 @@
                                 </button>
                             </div>
 
-                            <form method="POST" action="{{ route('payment.demo', $booking) }}">
+                            <form method="POST" action="{{ route('payment.demo', $booking) }}" data-secure-form novalidate>
                                 @csrf
                                 <input type="hidden" name="payment_method" x-bind:value="method">
                                 <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-600/30 transition text-lg flex items-center justify-center gap-3 mt-2">
@@ -120,9 +120,18 @@
         </div>
     </div>
 
+    @include('partials.form-security')
+
     {{-- Razorpay JS — only rendered when in Razorpay mode --}}
     @if($paymentMode === 'razorpay' && $razorpayOrder)
     <script>
+        function resetRazorpayButton() {
+            var button = document.getElementById('rzp-button');
+            button.disabled = false;
+            button.classList.remove('opacity-80', 'cursor-wait');
+            button.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Pay ₹{{ number_format($booking->total_amount, 2) }}';
+        }
+
         var options = {
             "key": "{{ config('services.razorpay.key') }}",
             "amount": "{{ $razorpayOrder['amount'] }}",
@@ -134,6 +143,7 @@
                 var form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '{{ route("payment.verify") }}';
+                form.setAttribute('data-secure-form', '');
                 var token = document.createElement('input');
                 token.type = 'hidden'; token.name = '_token'; token.value = '{{ csrf_token() }}';
                 form.appendChild(token);
@@ -151,10 +161,23 @@
                 form.submit();
             },
             "prefill": { "name": "{{ auth()->user()->name }}", "email": "{{ auth()->user()->email }}" },
-            "theme": { "color": "#f97316" }
+            "theme": { "color": "#f97316" },
+            "modal": {
+                "ondismiss": resetRazorpayButton
+            }
         };
         var rzp = new Razorpay(options);
-        document.getElementById('rzp-button').onclick = function(e) { rzp.open(); e.preventDefault(); };
+        rzp.on('payment.failed', function () {
+            resetRazorpayButton();
+            window.vedToast?.('Payment was not completed. Please try again.', 'error');
+        });
+        document.getElementById('rzp-button').onclick = function(e) {
+            e.preventDefault();
+            this.disabled = true;
+            this.classList.add('opacity-80', 'cursor-wait');
+            this.innerHTML = '<span class="form-submit-spinner"></span> Opening secure checkout...';
+            rzp.open();
+        };
     </script>
     @endif
 

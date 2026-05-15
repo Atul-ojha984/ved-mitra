@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'pandit.approved' => \App\Http\Middleware\EnsurePanditApproved::class,
+            'prevent.duplicate' => \App\Http\Middleware\PreventDuplicateSubmission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -38,7 +38,7 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('kundli.generate') }}" class="space-y-5" data-kundli-form>
+                <form method="POST" action="{{ route('kundli.generate') }}" class="space-y-5" data-kundli-form data-secure-form novalidate>
                     @csrf
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
@@ -86,9 +86,11 @@
     </main>
 
     @include('partials.footer')
+    @include('partials.form-security')
     <script>
         document.querySelectorAll('[data-kundli-form]').forEach((form) => {
             form.addEventListener('submit', () => {
+                if (window.VedForms && !window.VedForms.validateForm(form)) return;
                 const button = form.querySelector('[data-submit-button]');
                 form.querySelector('[data-spinner]')?.classList.remove('hidden');
                 form.querySelector('[data-submit-icon]')?.classList.add('hidden');

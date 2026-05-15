@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\Auth\PanditRegisterRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
@@ -23,49 +23,9 @@ class PanditRegistrationController extends Controller
     /**
      * Handle pandit registration.
      */
-    public function register(Request $request)
+    public function register(PanditRegisterRequest $request)
     {
-        $validated = $request->validate([
-            // Personal
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users',
-            'phone' => 'required|string|max:15',
-            'alternate_phone' => 'nullable|string|max:15',
-            'password' => 'required|string|min:8|confirmed',
-            'gender' => 'required|in:male,female,other',
-            'date_of_birth' => 'required|date|before:today',
-            'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-
-            // Location
-            'address' => 'required|string|max:500',
-            'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'pincode' => 'required|string|max:10',
-            'location_lat' => 'nullable|numeric',
-            'location_lng' => 'nullable|numeric',
-
-            // Professional
-            'experience_years' => 'required|integer|min:0|max:60',
-            'qualification' => 'required|string|max:255',
-            'specialization' => 'required|string|max:255',
-            'languages' => 'required|string|max:255',
-            'bio' => 'required|string|max:2000',
-            'consultation_fee' => 'required|numeric|min:0',
-            'available_timings' => 'nullable|string|max:255',
-            'services' => 'required|array|min:1',
-            'services.*' => 'exists:services,id',
-
-            // Documents
-            'aadhaar_document' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'pan_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'certificate_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-
-            // Social
-            'website_url' => 'nullable|url|max:255',
-            'youtube_url' => 'nullable|url|max:255',
-            'instagram_url' => 'nullable|url|max:255',
-            'facebook_url' => 'nullable|url|max:255',
-        ]);
+        $validated = $request->validated();
 
         // Create User
         $user = User::create([

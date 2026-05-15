@@ -10,7 +10,8 @@ return [
     'contact_phone' => env('SUPPORT_PHONE', '+91 98765 43210'),
     'address' => 'India',
     'audio' => [
-        'gayatri' => 'https://upload.wikimedia.org/wikipedia/commons/1/11/Gayatri_mantra.ogg',
+        'gayatri' => env('GAYATRI_MANTRA_MP3', 'https://upload.wikimedia.org/wikipedia/commons/transcoded/1/11/Gayatri_mantra.ogg/Gayatri_mantra.ogg.mp3'),
+        'gayatri_fallback' => 'https://upload.wikimedia.org/wikipedia/commons/1/11/Gayatri_mantra.ogg',
         'source' => 'https://commons.wikimedia.org/wiki/File:Gayatri_mantra.ogg',
     ],
     'images' => [

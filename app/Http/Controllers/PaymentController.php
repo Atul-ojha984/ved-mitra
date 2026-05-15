@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\DemoPaymentRequest;
+use App\Http\Requests\PaymentVerifyRequest;
 use App\Models\Booking;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
@@ -97,12 +98,13 @@ class PaymentController extends Controller
     /**
      * Verify Razorpay payment callback.
      */
-    public function verify(Request $request)
+    public function verify(PaymentVerifyRequest $request)
     {
+        $validated = $request->validated();
         $success = true;
         $error = "Payment Failed";
 
-        if (!empty($request->razorpay_payment_id)) {
+        if (!empty($validated['razorpay_payment_id'])) {
             try {
                 $api = new \Razorpay\Api\Api(
                     config('services.razorpay.key'),
@@ -110,9 +112,9 @@ class PaymentController extends Controller
                 );
 
                 $api->utility->verifyPaymentSignature([
-                    'razorpay_order_id' => $request->razorpay_order_id,
-                    'razorpay_payment_id' => $request->razorpay_payment_id,
-                    'razorpay_signature' => $request->razorpay_signature,
+                    'razorpay_order_id' => $validated['razorpay_order_id'],
+                    'razorpay_payment_id' => $validated['razorpay_payment_id'],
+                    'razorpay_signature' => $validated['razorpay_signature'],
                 ]);
             } catch (\Exception $e) {
                 $success = false;
@@ -124,10 +126,10 @@ class PaymentController extends Controller
         }
 
         if ($success) {
-            $payment = Payment::where('transaction_id', $request->razorpay_order_id)->first();
+            $payment = Payment::where('transaction_id', $validated['razorpay_order_id'])->first();
             if ($payment) {
                 $payment->update([
-                    'transaction_id' => $request->razorpay_payment_id,
+                    'transaction_id' => $validated['razorpay_payment_id'],
                     'status' => 'successful',
                 ]);
                 $payment->booking->update([
@@ -144,31 +146,29 @@ class PaymentController extends Controller
     /**
      * Process demo/direct payment (no external gateway needed).
      */
-    public function processDemoPayment(Request $request, Booking $booking)
+    public function processDemoPayment(DemoPaymentRequest $request, Booking $booking)
     {
         if ($booking->user_id !== auth()->id()) {
             abort(403);
         }
 
-        $request->validate([
-            'payment_method' => 'required|in:upi,card,netbanking,cod',
-        ]);
+        $validated = $request->validated();
 
         $payment = Payment::where('booking_id', $booking->id)->first();
 
         if ($payment) {
             $payment->update([
                 'status' => 'successful',
-                'payment_method' => $request->payment_method,
-                'transaction_id' => strtoupper($request->payment_method) . '_' . strtoupper(Str::random(12)),
+                'payment_method' => $validated['payment_method'],
+                'transaction_id' => strtoupper($validated['payment_method']) . '_' . strtoupper(Str::random(12)),
             ]);
         } else {
             Payment::create([
                 'booking_id' => $booking->id,
-                'transaction_id' => strtoupper($request->payment_method) . '_' . strtoupper(Str::random(12)),
+                'transaction_id' => strtoupper($validated['payment_method']) . '_' . strtoupper(Str::random(12)),
                 'amount' => $booking->total_amount,
                 'status' => 'successful',
-                'payment_method' => $request->payment_method,
+                'payment_method' => $validated['payment_method'],
             ]);
         }
 

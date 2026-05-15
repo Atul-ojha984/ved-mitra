@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,12 +20,10 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        $credentials = $request->validated();
+        unset($credentials['remember']);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::user();
@@ -46,12 +48,10 @@ class AuthController extends Controller
     }
 
     // ─── Admin Login ────────────────────────────────────
-    public function adminLogin(Request $request)
+    public function adminLogin(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        $credentials = $request->validated();
+        unset($credentials['remember']);
 
         if (Auth::attempt($credentials)) {
             if (Auth::user()->role !== 'admin') {
@@ -71,14 +71,9 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'required|string|max:15',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        $validated = $request->validated();
 
         $user = User::create([
             'name' => $validated['name'],
@@ -99,10 +94,8 @@ class AuthController extends Controller
         return view('auth.forgot-password');
     }
 
-    public function sendResetLink(Request $request)
+    public function sendResetLink(ForgotPasswordRequest $request)
     {
-        $request->validate(['email' => 'required|email']);
-
         $status = Password::sendResetLink($request->only('email'));
 
         return $status === Password::RESET_LINK_SENT
@@ -115,14 +108,8 @@ class AuthController extends Controller
         return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(ResetPasswordRequest $request)
     {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
-        ]);
-
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {

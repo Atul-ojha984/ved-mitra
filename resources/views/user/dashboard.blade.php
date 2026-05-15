@@ -163,5 +163,6 @@
         </div>
     </main>
 
+@include('partials.form-security')
 </body>
 </html>

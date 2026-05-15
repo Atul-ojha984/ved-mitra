@@ -7,6 +7,7 @@
         .brand-heading { font-family: 'Cinzel', 'Outfit', serif; letter-spacing: 0; }
         .temple-gradient { background: linear-gradient(135deg, #6b1111 0%, #a3280f 42%, #f97316 72%, #d6a83f 100%); }
         .divine-glow { box-shadow: 0 0 34px rgba(251, 191, 36, 0.28); }
+        .form-input-error { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.14) !important; }
     </style>
 @endonce
 <footer id="contact" class="bg-[#2a0d09] text-orange-50 no-print">
@@ -55,7 +56,8 @@
             <div>
                 <h3 class="font-bold text-white mb-4">Newsletter</h3>
                 <form class="space-y-3" data-newsletter-form>
-                    <input type="email" required placeholder="Email address" class="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-orange-100/60 outline-none focus:ring-2 focus:ring-amber-300">
+                    <input type="email" name="newsletter_email" required autocomplete="email" placeholder="Email address" class="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-orange-100/60 outline-none focus:ring-2 focus:ring-amber-300">
+                    <p class="hidden text-xs text-red-200" data-newsletter-error></p>
                     <button type="submit" class="w-full rounded-xl bg-amber-400 px-4 py-3 text-sm font-bold text-[#431407] hover:bg-amber-300 transition">Subscribe</button>
                 </form>
                 <div class="flex gap-3 mt-5 text-lg">
@@ -76,8 +78,30 @@
     document.querySelectorAll('[data-newsletter-form]').forEach((form) => {
         form.addEventListener('submit', (event) => {
             event.preventDefault();
-            form.reset();
-            window.vedToast?.('Newsletter subscription saved. Dhanyavaad.', 'success');
+            const input = form.querySelector('input[type="email"]');
+            const error = form.querySelector('[data-newsletter-error]');
+            const button = form.querySelector('button[type="submit"]');
+
+            if (!input.checkValidity()) {
+                error.textContent = 'Enter a valid email address.';
+                error.classList.remove('hidden');
+                input.classList.add('form-input-error');
+                return;
+            }
+
+            error.classList.add('hidden');
+            input.classList.remove('form-input-error');
+            button.disabled = true;
+            button.classList.add('opacity-80', 'cursor-wait');
+            button.textContent = 'Subscribing...';
+
+            setTimeout(() => {
+                form.reset();
+                button.disabled = false;
+                button.classList.remove('opacity-80', 'cursor-wait');
+                button.textContent = 'Subscribe';
+                window.vedToast?.('Newsletter subscription saved. Dhanyavaad.', 'success');
+            }, 350);
         });
     });
 </script>

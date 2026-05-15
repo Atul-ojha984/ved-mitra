@@ -30,7 +30,7 @@
             </div>
         @endif
 
-        <form action="{{ route('pandit.register.submit') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+        <form action="{{ route('pandit.register.submit') }}" method="POST" enctype="multipart/form-data" class="space-y-8" data-secure-form novalidate>
             @csrf
 
             <!-- ─── PERSONAL DETAILS ─── -->
@@ -47,11 +47,17 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Phone <span class="text-red-500">*</span></label>
-                        <input type="tel" name="phone" value="{{ old('phone') }}" required class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                        <input type="tel" name="phone" value="{{ old('phone') }}" required data-indian-phone inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" autocomplete="tel-national" placeholder="9876543210" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition {{ $errors->has('phone') ? 'form-input-error' : '' }}">
+                        @error('phone')
+                            <p class="form-field-error">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Alternate Phone</label>
-                        <input type="tel" name="alternate_phone" value="{{ old('alternate_phone') }}" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                        <input type="tel" name="alternate_phone" value="{{ old('alternate_phone') }}" data-indian-phone inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" autocomplete="tel-national" placeholder="9876543210" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition {{ $errors->has('alternate_phone') ? 'form-input-error' : '' }}">
+                        @error('alternate_phone')
+                            <p class="form-field-error">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
@@ -76,7 +82,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Profile Photo</label>
-                        <input type="file" name="profile_photo" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
+                        <input type="file" name="profile_photo" accept=".jpg,.jpeg,.png,.webp" data-max-mb="2" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
                     </div>
                 </div>
             </div>
@@ -99,7 +105,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Pincode <span class="text-red-500">*</span></label>
-                        <input type="text" name="pincode" value="{{ old('pincode') }}" required maxlength="6" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
+                        <input type="text" name="pincode" value="{{ old('pincode') }}" required inputmode="numeric" pattern="[1-9][0-9]{5}" maxlength="6" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
@@ -164,16 +170,16 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Aadhaar Card <span class="text-red-500">*</span></label>
-                        <input type="file" name="aadhaar_document" accept=".jpg,.jpeg,.png,.pdf" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
+                        <input type="file" name="aadhaar_document" accept=".jpg,.jpeg,.png,.pdf" data-max-mb="5" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
                         <p class="text-xs text-gray-400 mt-1">JPG, PNG, or PDF (max 5MB)</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">PAN Card</label>
-                        <input type="file" name="pan_document" accept=".jpg,.jpeg,.png,.pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
+                        <input type="file" name="pan_document" accept=".jpg,.jpeg,.png,.pdf" data-max-mb="5" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Certificates / Qualifications</label>
-                        <input type="file" name="certificate_document" accept=".jpg,.jpeg,.png,.pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
+                        <input type="file" name="certificate_document" accept=".jpg,.jpeg,.png,.pdf" data-max-mb="5" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
                     </div>
                 </div>
             </div>
@@ -208,5 +214,6 @@
             <p class="text-center text-sm text-gray-500 mt-4">Already have an account? <a href="{{ route('login') }}" class="text-orange-600 font-bold hover:underline">Log in</a></p>
         </form>
     </div>
+    @include('partials.form-security')
 </body>
 </html>

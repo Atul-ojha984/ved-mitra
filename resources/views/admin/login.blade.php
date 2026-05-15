@@ -30,7 +30,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('admin.login.submit') }}" class="space-y-5">
+            <form method="POST" action="{{ route('admin.login.submit') }}" class="space-y-5" data-secure-form novalidate>
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
@@ -47,5 +47,6 @@
         </div>
         <p class="text-center text-gray-600 text-xs mt-6">© {{ date('Y') }} {{ config('app.name', 'Ved Mitra') }}. All rights reserved.</p>
     </div>
+    @include('partials.form-security')
 </body>
 </html>

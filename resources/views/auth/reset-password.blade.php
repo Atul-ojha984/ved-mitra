@@ -30,7 +30,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('password.update') }}" method="POST">
+            <form action="{{ route('password.update') }}" method="POST" data-secure-form novalidate>
                 @csrf
                 <input type="hidden" name="token" value="{{ $token }}">
                 <div class="mb-4">
@@ -51,5 +51,6 @@
             </form>
         </div>
     </div>
+    @include('partials.form-security')
 </body>
 </html>

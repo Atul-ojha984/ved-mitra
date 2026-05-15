@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\KundliGenerateRequest;
 use App\Models\Kundli;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class KundliController extends Controller
@@ -49,7 +49,7 @@ class KundliController extends Controller
         return view('kundli.generate', compact('history'));
     }
 
-    public function generate(Request $request)
+    public function generate(KundliGenerateRequest $request)
     {
         [$validated, $kundliData, $kundli] = $this->generateKundli($request);
 
@@ -67,7 +67,7 @@ class KundliController extends Controller
         return view('kundli.result', compact('kundliData', 'validated', 'kundli', 'history'));
     }
 
-    public function apiGenerate(Request $request): JsonResponse
+    public function apiGenerate(KundliGenerateRequest $request): JsonResponse
     {
         [$validated, $kundliData, $kundli] = $this->generateKundli($request, false);
 
@@ -128,14 +128,9 @@ class KundliController extends Controller
             ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 
-    private function generateKundli(Request $request, bool $saveWhenAuthenticated = true): array
+    private function generateKundli(KundliGenerateRequest $request, bool $saveWhenAuthenticated = true): array
     {
-        $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'dob' => 'required|date|before:today',
-            'birth_time' => 'required|date_format:H:i',
-            'birth_place' => 'required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $kundliData = $this->calculateKundliData($validated);
         $kundli = null;

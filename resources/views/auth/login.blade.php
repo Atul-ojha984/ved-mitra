@@ -39,7 +39,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('login') }}" method="POST">
+            <form action="{{ route('login') }}" method="POST" data-secure-form novalidate>
                 @csrf
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
@@ -79,5 +79,6 @@
             </p>
         </div>
     </div>
+    @include('partials.form-security')
 </body>
 </html>

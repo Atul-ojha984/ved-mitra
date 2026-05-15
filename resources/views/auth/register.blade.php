@@ -33,7 +33,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('register') }}" method="POST">
+            <form action="{{ route('register') }}" method="POST" data-secure-form novalidate>
                 @csrf
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
@@ -53,8 +53,11 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <i class="fa-solid fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input type="tel" name="phone" value="{{ old('phone') }}" required placeholder="+91 98765 43210" class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white focus:border-orange-500 outline-none transition">
+                        <input type="tel" name="phone" value="{{ old('phone') }}" required data-indian-phone inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" autocomplete="tel-national" placeholder="9876543210" class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white focus:border-orange-500 outline-none transition {{ $errors->has('phone') ? 'form-input-error' : '' }}">
                     </div>
+                    @error('phone')
+                        <p class="form-field-error">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
@@ -93,5 +96,6 @@
             </div>
         </div>
     </div>
+    @include('partials.form-security')
 </body>
 </html>

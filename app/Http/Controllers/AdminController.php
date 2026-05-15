@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\RejectPanditRequest;
+use App\Http\Requests\Admin\UserStatusRequest;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\PanditProfile;
@@ -67,11 +69,11 @@ class AdminController extends Controller
         return view('admin.users', compact('users'));
     }
 
-    public function toggleUserStatus(User $user, Request $request)
+    public function toggleUserStatus(User $user, UserStatusRequest $request)
     {
-        $request->validate(['status' => 'required|in:active,suspended,banned']);
-        $user->update(['account_status' => $request->status]);
-        return back()->with('success', $user->name . ' status changed to ' . $request->status);
+        $validated = $request->validated();
+        $user->update(['account_status' => $validated['status']]);
+        return back()->with('success', $user->name . ' status changed to ' . $validated['status']);
     }
 
     public function deleteUser(User $user)
@@ -123,12 +125,14 @@ class AdminController extends Controller
         return back()->with('success', $pandit->user->name . ' has been approved!');
     }
 
-    public function rejectPandit(Request $request, PanditProfile $pandit)
+    public function rejectPandit(RejectPanditRequest $request, PanditProfile $pandit)
     {
+        $validated = $request->validated();
+
         $pandit->update([
             'approval_status' => 'rejected',
             'verified' => false,
-            'rejection_reason' => $request->rejection_reason,
+            'rejection_reason' => $validated['rejection_reason'] ?? null,
         ]);
         try { Mail::to($pandit->user->email)->send(new PanditRejected($pandit)); } catch (\Exception $e) { \Log::warning('Rejection email failed: ' . $e->getMessage()); }
         return back()->with('success', $pandit->user->name . ' has been rejected.');

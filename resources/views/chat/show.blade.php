@@ -42,9 +42,9 @@
 
     <!-- Input -->
     <div class="bg-white border-t border-gray-100 p-4 shrink-0">
-        <form method="POST" action="{{ route('chat.send', $booking) }}" class="flex gap-3">
+        <form method="POST" action="{{ route('chat.send', $booking) }}" class="flex gap-3" data-secure-form novalidate>
             @csrf
-            <input type="text" name="message" required placeholder="Type your message..." autofocus class="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none text-sm">
+            <input type="text" name="message" required maxlength="2000" placeholder="Type your message..." autofocus class="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none text-sm">
             <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-3 rounded-xl transition font-medium"><i class="fa-solid fa-paper-plane"></i></button>
         </form>
     </div>
@@ -64,4 +64,5 @@
             } catch (e) {}
         }, 5000);
     </script>
+    @include('partials.form-security')
 </body></html>

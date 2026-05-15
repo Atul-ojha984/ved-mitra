@@ -28,23 +28,23 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->
 // ─── Auth Routes (Guest only) ───────────────────────────
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware(['throttle:auth', 'prevent.duplicate:5']);
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware(['throttle:registration', 'prevent.duplicate:20']);
 
     // Pandit Registration
     Route::get('/register/pandit', [PanditRegistrationController::class, 'showForm'])->name('pandit.register');
-    Route::post('/register/pandit', [PanditRegistrationController::class, 'register'])->name('pandit.register.submit');
+    Route::post('/register/pandit', [PanditRegistrationController::class, 'register'])->middleware(['throttle:registration', 'prevent.duplicate:30'])->name('pandit.register.submit');
 
     // Forgot / Reset Password
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware(['throttle:passwords', 'prevent.duplicate:20'])->name('password.email');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware(['throttle:passwords', 'prevent.duplicate:20'])->name('password.update');
 
     // Admin Login
     Route::get('/admin/login', [PageController::class, 'adminLogin'])->name('admin.login');
-    Route::post('/admin/login', [AuthController::class, 'adminLogin'])->name('admin.login.submit');
+    Route::post('/admin/login', [AuthController::class, 'adminLogin'])->middleware(['throttle:auth', 'prevent.duplicate:5'])->name('admin.login.submit');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
@@ -52,7 +52,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // ─── Public Spiritual Features ─────────────────────────
 Route::get('/pandits/search', [SearchController::class, 'index'])->name('pandit.search');
 Route::get('/kundli', [KundliController::class, 'showForm'])->name('kundli.form');
-Route::post('/kundli/generate', [KundliController::class, 'generate'])->name('kundli.generate');
+Route::post('/kundli/generate', [KundliController::class, 'generate'])->middleware(['throttle:forms', 'prevent.duplicate:15'])->name('kundli.generate');
 Route::get('/ebooks', [EbookController::class, 'index'])->name('ebooks.index');
 Route::get('/ebooks/{ebook}', [EbookController::class, 'show'])->name('ebooks.show');
 Route::get('/festivals', [FestivalController::class, 'index'])->name('festivals.index');
@@ -77,7 +77,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('profile.update');
 
     // Kundli history
     Route::get('/kundli/{kundli}', [KundliController::class, 'show'])->name('kundli.show');
@@ -85,17 +85,17 @@ Route::middleware(['auth'])->group(function () {
 
     // Booking
     Route::get('/booking/{pandit}', [BookingController::class, 'create'])->name('booking.create');
-    Route::post('/booking/store/{pandit}', [BookingController::class, 'store'])->name('booking.store');
+    Route::post('/booking/store/{pandit}', [BookingController::class, 'store'])->middleware(['throttle:forms', 'prevent.duplicate:20'])->name('booking.store');
 
     // Payment
     Route::get('/payment/{booking}', [PaymentController::class, 'checkout'])->name('payment.checkout');
-    Route::post('/payment/verify', [PaymentController::class, 'verify'])->name('payment.verify');
-    Route::post('/payment/demo/{booking}', [PaymentController::class, 'processDemoPayment'])->name('payment.demo');
+    Route::post('/payment/verify', [PaymentController::class, 'verify'])->middleware(['throttle:payments', 'prevent.duplicate:30'])->name('payment.verify');
+    Route::post('/payment/demo/{booking}', [PaymentController::class, 'processDemoPayment'])->middleware(['throttle:payments', 'prevent.duplicate:30'])->name('payment.demo');
     Route::get('/payment/success/{booking}', [PaymentController::class, 'success'])->name('payment.success');
 
     // Chat (post-booking)
     Route::get('/chat/{booking}', [ChatController::class, 'show'])->name('chat.show');
-    Route::post('/chat/{booking}/send', [ChatController::class, 'send'])->name('chat.send');
+    Route::post('/chat/{booking}/send', [ChatController::class, 'send'])->middleware(['throttle:chat', 'prevent.duplicate:4'])->name('chat.send');
     Route::get('/chat/{booking}/messages', [ChatController::class, 'fetchMessages'])->name('chat.messages');
 
     // Slot availability API
@@ -107,14 +107,14 @@ Route::middleware(['auth', 'pandit.approved'])->prefix('pandit')->group(function
     Route::get('/dashboard', [PanditDashboardController::class, 'dashboard'])->name('pandit.dashboard');
 
     Route::get('/bookings', [PanditDashboardController::class, 'bookings'])->name('pandit.bookings');
-    Route::post('/bookings/{booking}/accept', [PanditDashboardController::class, 'acceptBooking'])->name('pandit.booking.accept');
-    Route::post('/bookings/{booking}/reject', [PanditDashboardController::class, 'rejectBooking'])->name('pandit.booking.reject');
-    Route::post('/bookings/{booking}/complete', [PanditDashboardController::class, 'completeBooking'])->name('pandit.booking.complete');
+    Route::post('/bookings/{booking}/accept', [PanditDashboardController::class, 'acceptBooking'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('pandit.booking.accept');
+    Route::post('/bookings/{booking}/reject', [PanditDashboardController::class, 'rejectBooking'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('pandit.booking.reject');
+    Route::post('/bookings/{booking}/complete', [PanditDashboardController::class, 'completeBooking'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('pandit.booking.complete');
 
     Route::get('/availability', [PanditDashboardController::class, 'availability'])->name('pandit.availability');
-    Route::post('/availability', [PanditDashboardController::class, 'saveAvailability'])->name('pandit.availability.save');
-    Route::post('/availability/block', [PanditDashboardController::class, 'blockDate'])->name('pandit.availability.block');
-    Route::delete('/availability/unblock/{blockedDate}', [PanditDashboardController::class, 'unblockDate'])->name('pandit.availability.unblock');
+    Route::post('/availability', [PanditDashboardController::class, 'saveAvailability'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('pandit.availability.save');
+    Route::post('/availability/block', [PanditDashboardController::class, 'blockDate'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('pandit.availability.block');
+    Route::delete('/availability/unblock/{blockedDate}', [PanditDashboardController::class, 'unblockDate'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('pandit.availability.unblock');
 
     Route::get('/calendar', [PanditDashboardController::class, 'calendar'])->name('pandit.calendar');
     Route::get('/calendar/events', [PanditDashboardController::class, 'calendarEvents'])->name('pandit.calendar.events');
@@ -128,18 +128,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
-    Route::post('/users/{user}/status', [AdminController::class, 'toggleUserStatus'])->name('admin.user.status');
-    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
+    Route::post('/users/{user}/status', [AdminController::class, 'toggleUserStatus'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('admin.user.status');
+    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('admin.user.delete');
 
     Route::get('/pandits', [AdminController::class, 'pandits'])->name('admin.pandits');
     Route::get('/pandits/pending', [PageController::class, 'pendingPandits'])->name('admin.pandits.pending');
     Route::get('/review/{pandit}', [AdminController::class, 'reviewPandit'])->name('admin.review');
-    Route::post('/approve/{pandit}', [AdminController::class, 'approvePandit'])->name('admin.approve');
-    Route::post('/reject/{pandit}', [AdminController::class, 'rejectPandit'])->name('admin.reject');
-    Route::post('/suspend/{pandit}', [AdminController::class, 'suspendPandit'])->name('admin.suspend.pandit');
+    Route::post('/approve/{pandit}', [AdminController::class, 'approvePandit'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('admin.approve');
+    Route::post('/reject/{pandit}', [AdminController::class, 'rejectPandit'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('admin.reject');
+    Route::post('/suspend/{pandit}', [AdminController::class, 'suspendPandit'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('admin.suspend.pandit');
 
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('admin.bookings');
-    Route::post('/bookings/{booking}/cancel', [AdminController::class, 'cancelBooking'])->name('admin.booking.cancel');
+    Route::post('/bookings/{booking}/cancel', [AdminController::class, 'cancelBooking'])->middleware(['throttle:forms', 'prevent.duplicate:10'])->name('admin.booking.cancel');
 
     Route::get('/payments', [AdminController::class, 'payments'])->name('admin.payments');
 });

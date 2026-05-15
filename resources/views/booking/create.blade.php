@@ -42,7 +42,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('booking.store', $pandit) }}" method="POST">
+                    <form action="{{ route('booking.store', $pandit) }}" method="POST" data-secure-form novalidate>
                         @csrf
                         
                         <div class="mb-6">
@@ -50,7 +50,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 @foreach($pandit->services as $service)
                                     <label class="relative flex cursor-pointer rounded-xl border border-gray-200 bg-white p-4 shadow-sm focus:outline-none hover:border-orange-500 transition">
-                                        <input type="radio" name="service_id" value="{{ $service->id }}" class="sr-only peer" required>
+                                        <input type="radio" name="service_id" value="{{ $service->id }}" class="sr-only peer" required {{ (string) old('service_id') === (string) $service->id ? 'checked' : '' }}>
                                         <span class="flex flex-1">
                                             <span class="flex flex-col">
                                                 <span class="block text-sm font-medium text-gray-900">{{ $service->name }}</span>
@@ -72,11 +72,11 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Select Time</label>
                                 <select name="booking_time" required class="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none">
                                     <option value="">Choose a slot...</option>
-                                    <option value="08:00:00">08:00 AM</option>
-                                    <option value="10:00:00">10:00 AM</option>
-                                    <option value="12:00:00">12:00 PM</option>
-                                    <option value="15:00:00">03:00 PM</option>
-                                    <option value="17:00:00">05:00 PM</option>
+                                    <option value="08:00:00" {{ old('booking_time') === '08:00:00' ? 'selected' : '' }}>08:00 AM</option>
+                                    <option value="10:00:00" {{ old('booking_time') === '10:00:00' ? 'selected' : '' }}>10:00 AM</option>
+                                    <option value="12:00:00" {{ old('booking_time') === '12:00:00' ? 'selected' : '' }}>12:00 PM</option>
+                                    <option value="15:00:00" {{ old('booking_time') === '15:00:00' ? 'selected' : '' }}>03:00 PM</option>
+                                    <option value="17:00:00" {{ old('booking_time') === '17:00:00' ? 'selected' : '' }}>05:00 PM</option>
                                 </select>
                             </div>
                         </div>
@@ -94,5 +94,6 @@
             </div>
         </div>
     </div>
+    @include('partials.form-security')
 </body>
 </html>
