@@ -17,6 +17,12 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\DiagnosticController;
+
+// ─── Temporary Diagnostic Route (Strictly Protected) ───
+Route::get('/diagnostic/admin', [DiagnosticController::class, 'checkAdmin'])
+    ->middleware('throttle:10,1')
+    ->name('diagnostic.admin');
 
 // ─── Public Routes ──────────────────────────────────────
 Route::get('/', [PageController::class, 'home'])->name('home');

@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Admin
-        User::create(['name'=>'Admin','email'=>'admin@vedmitra.in','password'=>Hash::make('Admin@12345'),'role'=>'admin','account_status'=>'active']);
+        $this->call(AdminUserSeeder::class);
 
         // Services
         foreach ([

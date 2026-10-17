@@ -52,10 +52,33 @@ composer install --no-dev --optimize-autoloader && npm ci && npm run build && ph
 
 ### Start Command
 ```
-php artisan serve --host=0.0.0.0 --port=$PORT
+php artisan migrate --force && php artisan admin:ensure && php artisan serve --host=0.0.0.0 --port=$PORT
 ```
 
-### Database Setup
-1. Create a PostgreSQL database on Render
-2. Run migrations: `php artisan migrate --force`
-3. Seed data: `php artisan db:seed --class=EbookLibrarySeeder --force`
+### Database & Admin Setup (Without Render Shell)
+1. In your Render Dashboard Web Service settings:
+   - Ensure the Start Command is set to:
+     `php artisan migrate --force && php artisan admin:ensure && php artisan serve --host=0.0.0.0 --port=$PORT`
+   - Under **Environment Variables**, add:
+     - `ADMIN_EMAIL`: `admin@vedmitra.in`
+     - `ADMIN_PASSWORD`: `Admin@12345`
+     - `ADMIN_NAME`: `Admin`
+     - `ADMIN_DIAGNOSTIC_TOKEN`: (e.g. generate with `openssl rand -hex 24`)
+
+2. Deploy the changes. When the service boots, Render will automatically run migrations, ensure the admin account is seeded idempotently, and launch the web server.
+
+3. Call the diagnostic endpoint from your local terminal:
+```bash
+curl -i -H "X-Diagnostic-Token: <YOUR_ADMIN_DIAGNOSTIC_TOKEN>" https://ved-mitra-backend.onrender.com/diagnostic/admin
+```
+Expected response:
+```json
+{"admin_found":true,"password_matches":true,"role_is_admin":true,"database_connection_driver":"pgsql"}
+```
+
+4. Log into the admin portal:
+   `https://ved-mitra-backend.onrender.com/admin/login`
+   - Email: `admin@vedmitra.in`
+   - Password: `Admin@12345`
+
+5. Once verified, delete `app/Http/Controllers/DiagnosticController.php` and remove `/diagnostic/admin` from `routes/web.php` and `routes/api.php`, then redeploy.

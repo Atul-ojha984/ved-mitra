@@ -82,6 +82,9 @@ fi\n\
 # Run migrations\n\
 php artisan migrate --force\n\
 \n\
+# Ensure admin user exists idempotently\n\
+php artisan admin:ensure\n\
+\n\
 # Seed database\n\
 php artisan db:seed --class=EbookLibrarySeeder --force\n\
 \n\
